@@ -1,0 +1,308 @@
+// TYPES
+/** A unique ID */
+type Id = number;
+
+type Coord = {
+    x: number;
+    y: number;
+}
+
+type Trajectory = {
+    coord: Coord;
+    target: Coord;
+}
+
+enum Instruction {
+    WAIT = "WAIT",
+    SPELL = "SPELL",
+    MOVE = "MOVE"
+}
+
+enum ThreatFor {
+    none = 0,
+    allyBase = 1,
+    ennemyBase = 2
+}
+
+enum Target {
+    /** No target */
+    none = 0,
+    /** targeting a base (any) */
+    base = 1
+}
+
+enum EntityType {
+    monster = 0,
+    ally = 1,
+    opponent = 2
+};
+
+// CLASSES
+
+class Player {
+    base: Base;
+    heros: Map<Id, Ally | Opponent> = new Map<Id, Ally | Opponent>();
+
+    constructor(base: Base) {
+        this.base = base;
+    }
+
+    addHero(hero: Ally | Opponent) {
+        this.heros.set(hero.id, hero);
+    }
+}
+
+class Base {
+    static baseRadius: 5000;
+
+    id: Id;
+    coord: Coord;
+
+    health: number;
+    mana: number;
+
+    constructor(id: Id, x: number, y: number) {
+        this.id = id;
+        this.coord = {
+            x: x,
+            y: y
+        }
+    }
+
+    setStatus(health: number, mana: number) {
+        this.health = health;
+        this.mana = mana;
+    }
+}
+
+class Entity {
+    id: number;
+    coord: Coord;
+    trajectory: Trajectory;
+
+    targeting: Target;
+    threatFor: ThreatFor;
+
+    /** Is the entity under a spell */
+    isControlled: boolean;
+
+    health: number;
+    shieldLife: number;
+
+    public static getFirstOrNew(type: EntityType, id: number): Entity {
+        switch (type) {
+            case EntityType.ally: return player.heros.has(id) ? player.heros.get(id) : new Ally(id)
+            case EntityType.opponent: return opponent.heros.has(id) ? opponent.heros.get(id) : new Opponent(id)
+            case EntityType.monster: return monsters.has(id) ? monsters.get(id) : new Monster(id)
+            default: throw new Error(`Unhandled type ${type}`)
+        }
+    }
+
+    constructor(id: number) {
+        this.id = id
+    }
+
+    distanceFrom(coord: Coord): number {
+        return Math.abs(Math.sqrt(Math.pow(this.coord.x - coord.x, 2) + Math.pow(this.coord.y - coord.y, 2)))
+    }
+
+    isAlive(): boolean {
+        return this.health > 0;
+    }
+
+    setCoord(x: number, y: number) {
+        this.coord = {
+            x: x,
+            y: y
+        }
+    }
+
+    setStatus(controlled: boolean, shield: number, health: number) {
+        this.isControlled = controlled
+        this.shieldLife = shield
+        this.health = health
+    }
+
+    setTrajectory(vx: number, vy: number) {
+        this.trajectory = {
+            coord: {
+                x: this.coord.x,
+                y: this.coord.y
+            },
+            target: {
+                x: vx,
+                y: vy
+            }
+        }
+    }
+
+    setTarget(target: Target) {
+        this.targeting = target;
+    }
+
+    setThreatFor(threatFor: ThreatFor) {
+        this.threatFor = threatFor;
+    }
+}
+
+class Ally extends Entity {
+    type: EntityType;
+
+    constructor(id: number) {
+        super(id)
+        this.type = EntityType.ally;
+    }
+}
+
+class Opponent extends Entity {
+    type: EntityType;
+
+    constructor(id: number) {
+        super(id)
+        this.type = EntityType.opponent;
+    }
+}
+
+class Monster extends Entity {
+    type: EntityType;
+
+    constructor(id: number) {
+        super(id)
+        this.type = EntityType.monster;
+    }
+
+    isInBase(base: Base): boolean {
+        console.error(
+            this.id,
+            Base.baseRadius,
+            Math.abs(this.coord.x - base.coord.x),
+            Math.abs(this.coord.y - base.coord.y),
+            (Math.abs(this.coord.x - base.coord.x) < Base.baseRadius),
+            (Math.abs(this.coord.y - base.coord.y) < Base.baseRadius)
+        );
+        // TODO apply PI radius here
+        return Math.abs(base.coord.x - this.coord.x) <= Base.baseRadius &&
+            Math.abs(base.coord.y - this.coord.y) <= Base.baseRadius
+    }
+}
+
+var Frame = {
+    width: 17630,
+    height: 9000
+};
+var player: Player;
+var opponent: Player;
+var monsters: Map<Id, Monster> = new Map<Id, Monster>();
+
+initPlayers();
+
+// ----- GAME LOOP -----
+
+while (true) {
+    refreshBases();
+    refreshEntities();
+
+    console.error(player.base)
+
+    const MonstersInBase = [...monsters.values()]
+        .filter(monster => {
+            return monster.threatFor === ThreatFor.allyBase ||
+                monster.isInBase(player.base)
+        }).sort((mA, mB) => mA.distanceFrom(player.base.coord) - mB.distanceFrom(player.base.coord))
+
+    player.heros.forEach(hero => {
+        // Write an action using console.log()
+        // To debug: console.error('Debug messages...');
+
+        // Attaquer le Premier monstre qui entre dans la base
+
+        if (MonstersInBase.length) {
+            const monster = MonstersInBase.at(0)
+            console.log(Instruction.MOVE + ` ${monster.coord.x} ${monster.coord.y}`);
+        } else {
+            console.log(Instruction.MOVE + ` ${player.base.coord.x} ${player.base.coord.y}`);
+        }
+
+        // In the first league: MOVE <x> <y> | WAIT; 
+        // In later leagues: | SPELL <spellParams>;
+    });
+}
+
+// ----- END GAME LOOP -----
+
+function initPlayers() {
+    let inputs: string[] = readline().split(' ');
+    // Always 3
+    const heroesPerPlayer: number = parseInt(readline());
+
+    player = new Player(new Base(0, parseInt(inputs[0]), parseInt(inputs[1])));
+    opponent = new Player(new Base(1, Frame.width, Frame.height));
+}
+
+function refreshBases() {
+    let inputs: string[] = readline().split(' ');
+    player.base.setStatus(
+        // Player's base health
+        parseInt(inputs[0]),
+        // Ignore in the first league; Spend ten mana to cast a spell
+        parseInt(inputs[1])
+    )
+    inputs = readline().split(' ');
+    opponent.base.setStatus(
+        // Opponents's base health
+        parseInt(inputs[0]),
+        // Ignore in the first league; Spend ten mana to cast a spell
+        parseInt(inputs[1])
+    )
+}
+
+function refreshEntities() {
+    // reset Monsters
+    monsters = new Map<Id, Monster>();
+    // Amount of heros and monsters you can see
+    const entityCount: number = parseInt(readline());
+    for (let i = 0; i < entityCount; i++) {
+        var inputs: string[] = readline().split(' ');
+        const id: Id = parseInt(inputs[0]) as Id;
+        const type: EntityType = parseInt(inputs[1]) as EntityType;
+        const entity = Entity.getFirstOrNew(type, id);
+
+        entity.setStatus(
+            // Ignore for this league; Equals 1 when this entity is under a control spell
+            parseInt(inputs[5]) === 1,
+            // Ignore for this league; Count down until shield spell fades
+            parseInt(inputs[4]),
+            // Remaining health of this monster
+            parseInt(inputs[6])
+        )
+        // Coordinates
+        entity.setCoord(parseInt(inputs[2]), parseInt(inputs[3]))
+        // Trajectory of this monster
+        entity.setTrajectory(
+            parseInt(inputs[7]),
+            parseInt(inputs[8])
+        )
+        // 0=monster with no target yet, 1=monster targeting a base
+        entity.setTarget(parseInt(inputs[9]))
+        // Given this monster's trajectory, is it a threat to 1=your base, 2=your opponent's base, 0=neither
+        entity.setThreatFor(parseInt(inputs[10]))
+
+        switch (type) {
+            case EntityType.ally:
+                if (!player.heros.has(entity.id)) {
+                    player.heros.set(entity.id, entity as Ally);
+                }
+                break;
+            case EntityType.opponent:
+                if (!opponent.heros.has(entity.id)) {
+                    opponent.heros.set(entity.id, entity as Opponent);
+                }
+                break;
+            case EntityType.monster:
+                if (!monsters.has(entity.id)) {
+                    monsters.set(entity.id, entity as Monster);
+                }
+                break;
+        }
+    }
+}
