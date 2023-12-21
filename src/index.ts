@@ -1,7 +1,5 @@
 namespace TS {
 
-    // CLASSES
-
     /** The game frame width and height */
     const Frame = {
         width: 9999,
@@ -29,6 +27,7 @@ namespace TS {
     };
 
     const droneList: Map<Id, Drone> = new Map<Id, Drone>();
+
 
     /**
      * Score points by scanning valuable fish faster than your opponent.
@@ -113,14 +112,16 @@ namespace TS {
         GameStatus.myScore = parseInt(getInput());
         GameStatus.foeScore = parseInt(getInput());
 
-        GameStatus.myScanCount = parseInt(getInput());
-        for (let i = 0; i < GameStatus.myScanCount; i++) {
+        const myScanCount: number = parseInt(getInput());
+        GameStatus.myScanCount = myScanCount;
+        for (let i = 0; i < myScanCount; i++) {
             const creatureId: Id = parseInt(getInput());
             GameStatus.creatureList.get(creatureId)!.setScannedBy(Player.me);
         }
 
-        GameStatus.foeScanCount = parseInt(getInput());
-        for (let i = 0; i < GameStatus.foeScanCount; i++) {
+        const foeScanCount: number = parseInt(getInput());
+        GameStatus.foeScanCount = foeScanCount;
+        for (let i = 0; i < foeScanCount; i++) {
             const creatureId: Id = parseInt(getInput());
             GameStatus.creatureList.get(creatureId)!.setScannedBy(Player.foe);
         }
@@ -138,7 +139,7 @@ namespace TS {
             const battery: number = parseInt(inputs[4]);
 
             const drone = droneList.get(droneId) ?? new Drone(
-                droneId, Player.me
+                droneId, type
             );
             drone.setCoord({ x: droneX, y: droneY });
             drone.setEmergency(emergency);
@@ -156,7 +157,7 @@ namespace TS {
         /** The number of creatures to scan */
         const creatureCount: number = parseInt(getInput());
         for (let i = 0; i < creatureCount; i++) {
-            let inputs: string[] = getInput().split(' ');
+            const inputs: string[] = getInput().split(' ');
             const creatureId: Id = parseInt(inputs[0]);
             const color: CreatureColor = parseInt(inputs[1]);
             const type: CreatureType = parseInt(inputs[2]);
