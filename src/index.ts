@@ -49,7 +49,7 @@ namespace TS {
 
         const radarBlipCount: number = parseInt(getInput());
         for (let i = 0; i < radarBlipCount; i++) {
-            var inputs: string[] = getInput().split(' ');
+            const inputs: string[] = getInput().split(' ');
             const droneId: Id = parseInt(inputs[0]);
             const creatureId: Id = parseInt(inputs[1]);
             const radar: Radar = inputs[2] as Radar;
@@ -71,7 +71,7 @@ namespace TS {
         const visibleCreatureList: Array<Creature> = [];
         const visibleCreatureCount: number = parseInt(getInput());
         for (let i = 0; i < visibleCreatureCount; i++) {
-            var inputs: string[] = getInput().split(' ');
+            const inputs: string[] = getInput().split(' ');
             const creatureId: number = parseInt(inputs[0]);
             const creature: Creature | undefined = GameStatus.creatureList.get(creatureId);
             // * La position de la créature.
@@ -93,7 +93,7 @@ namespace TS {
     function updateGameStatusScans(): void {
         const droneScanCount: number = parseInt(getInput());
         for (let i = 0; i < droneScanCount; i++) {
-            var inputs: string[] = getInput().split(' ');
+            const inputs: string[] = getInput().split(' ');
             const droneId: Id = parseInt(inputs[0]);
             const drone: Drone | undefined = droneList.get(droneId);
             const creatureId: Id = parseInt(inputs[1]);
@@ -130,7 +130,7 @@ namespace TS {
     function parsePlayerDrones(type: Player): void {
         const droneCount: number = parseInt(getInput());
         for (let i = 0; i < droneCount; i++) {
-            var inputs: string[] = getInput().split(' ');
+            const inputs: string[] = getInput().split(' ');
             const droneId: number = parseInt(inputs[0]);
             const droneX: number = parseInt(inputs[1]);
             const droneY: number = parseInt(inputs[2]);
