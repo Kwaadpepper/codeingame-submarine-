@@ -2,7 +2,7 @@ namespace TS {
 
     // CLASSES
 
-    /** The game Frame */
+    /** The game frame width and height */
     const Frame = {
         width: 9999,
         height: 9999
@@ -25,7 +25,7 @@ namespace TS {
         foeScore: 0,
         myScanCount: 0,
         foeScanCount: 0,
-        creatureList: parseCreatures()
+        creatureList: parseCreatures(),
     };
 
     const droneList: Map<Id, Drone> = new Map<Id, Drone>();
@@ -50,9 +50,9 @@ namespace TS {
         const radarBlipCount: number = parseInt(getInput());
         for (let i = 0; i < radarBlipCount; i++) {
             var inputs: string[] = getInput().split(' ');
-            const droneId: number = parseInt(inputs[0]);
-            const creatureId: number = parseInt(inputs[1]);
-            const radar: string = inputs[2];
+            const droneId: Id = parseInt(inputs[0]);
+            const creatureId: Id = parseInt(inputs[1]);
+            const radar: Radar = inputs[2] as Radar;
         }
 
         // * Actions foreach of my drones
