@@ -86,6 +86,8 @@ namespace TS {
                 return;
             }
 
+            // * Increment X to go left / right
+            target.x = target.x + Math.floor(Math.sin(TURNS) * 270);
             // * Increment Y to go up / down
             target.y = target.y + Math.floor(Math.cos(TURNS) * 270);
 
