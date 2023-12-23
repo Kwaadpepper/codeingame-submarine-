@@ -7,8 +7,8 @@ namespace TS {
 
         /** The start point for first Arena */
         topStartPoint: {
-            x: Math.floor(9999 / 2),
-            y: 500
+            x: 4600,
+            y: 2750
         },
 
         /** The map center line */
@@ -87,7 +87,7 @@ namespace TS {
             }
 
             // * Increment X to go left / right
-            target.x = target.x + Math.floor(Math.sin(TURNS) * 270);
+            target.x = target.x + Math.floor(Math.sin(TURNS) * 1000);
             // * Increment Y to go up / down
             target.y = target.y + Math.floor(Math.cos(TURNS) * 270);
 
