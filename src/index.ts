@@ -109,6 +109,7 @@ namespace TS {
         {
             done: false,
             action: (drone, phazeIndex) => {
+                Frame.topStartPoint.x = drone.coord.x;
                 const target = Frame.topStartPoint;
                 if (GameMap.isAtCoord(drone, target)) {
                     PHAZES[phazeIndex].done = true;
