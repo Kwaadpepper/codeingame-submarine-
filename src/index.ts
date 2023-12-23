@@ -64,25 +64,55 @@ namespace TS {
 
     let TURNS: number = 0;
 
+    const lIGHT_TOGGLE = 10;
+
+    const levelStagnation: PHAZE = {
+        done: false,
+        action: (drone, phazeIndex) => {
+            console.error(`Phaze ${phazeIndex}`);
+            const target = {
+                x: Frame.center,
+                y: Frame.levels[phazeIndex].top + (2500 / 2)
+            };
+            console.error(`target ${target.x} ${target.y}`);
+            if (TURNS === (((200 - 5) / 3) * phazeIndex)) {
+                doAction(Action.WAIT);
+                PHAZES[phazeIndex].done = true;
+                return;
+            }
+            if (GameMap.isAtCoord(drone, target)) {
+                doAction(Action.WAIT);
+                return;
+            }
+            doAction(Action.MOVE, target, TURNS % lIGHT_TOGGLE === 0 ? Light.ON : Light.OFF);
+        }
+    };
+
     /*
         Strategy, go middle then go down slowly,
         Scanning all creatures on each step,
-        put on light each 5 turns then off
+        put on light each lIGHT_TOGGLE turns then off
     */
     const PHAZES: Array<PHAZE> = [
         // * --- PHASE 1 - Go MIDDLE ---
         {
             done: false,
-            action: (drone) => {
+            action: (drone, phazeIndex) => {
                 const target = Frame.topStartPoint;
                 if (GameMap.isAtCoord(drone, target)) {
-                    PHAZES[0].done = true;
+                    PHAZES[phazeIndex].done = true;
                     doAction(Action.WAIT);
                     return;
                 }
-                doAction(Action.MOVE, target, TURNS % 5 === 0 ? Light.ON : Light.OFF);
+                doAction(Action.MOVE, target, TURNS % lIGHT_TOGGLE === 0 ? Light.ON : Light.OFF);
             }
-        }
+        },
+        // * --- PHASE 2 - Go Center of LEVEL 2 for ((200 - 5) / 3 * index) turns ---
+        Object.assign({}, levelStagnation),
+        // * --- PHASE 3 - Go Center of LEVEL 3 for ((200 - 5) / 3 * index) turns ---
+        Object.assign({}, levelStagnation),
+        // * --- PHASE 4 - Go Center of LEVEL 4 for ((200 - 5) / 3 * index) turns ---
+        Object.assign({}, levelStagnation),
     ];
 
     // ----- GAME LOOP -----
@@ -110,13 +140,14 @@ namespace TS {
         Drone.getPlayerDrones(droneList, Player.me).forEach(drone => {
             // Write an action using console.log()
             // To debug: console.error('Debug messages...');
-            const phazeToDo = PHAZES.find(phaze => !phaze.done);
-            if (phazeToDo === undefined) {
+            const phazeIndexToDo = PHAZES.findIndex((phaze) => !phaze.done);
+            if (phazeIndexToDo === -1) {
                 console.error(`Nothing left to do for drone ${drone.id}`);
+                console.error(PHAZES);
                 doAction(Action.WAIT);
             } else {
                 console.error('Do action');
-                phazeToDo.action(drone);
+                PHAZES[phazeIndexToDo].action(drone, phazeIndexToDo);
             }
         });
         TURNS++;

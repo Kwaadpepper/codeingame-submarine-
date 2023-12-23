@@ -5,7 +5,7 @@ namespace TS {
 
     export type PHAZE = {
         done: boolean,
-        action: (drone: Drone) => void
+        action: (drone: Drone, phazeIndex: number) => void
     }
 
     /** Coordinates */
