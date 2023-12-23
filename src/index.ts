@@ -64,7 +64,10 @@ namespace TS {
 
     let TURNS: number = 0;
 
+    const CREATURES_PER_LEVEL = 4;
     const lIGHT_TOGGLE = 10;
+
+    let SCANNED_CREATURES: number = 0;
 
     const levelStagnation: PHAZE = {
         done: false,
@@ -75,7 +78,9 @@ namespace TS {
                 y: Frame.levels[phazeIndex].top + (2500 / 2)
             };
             console.error(`target ${target.x} ${target.y}`);
-            if (TURNS === (((200 - 5) / 3) * phazeIndex)) {
+            const waitUntil: number = ((200 - 5) / 3) * phazeIndex;
+            const shouldSkip: boolean = SCANNED_CREATURES >= (CREATURES_PER_LEVEL * phazeIndex);
+            if (shouldSkip || TURNS > waitUntil) {
                 doAction(Action.WAIT);
                 PHAZES[phazeIndex].done = true;
                 return;
@@ -135,6 +140,9 @@ namespace TS {
             const creatureId: Id = parseInt(inputs[1]);
             const radar: Radar = inputs[2] as Radar;
         }
+
+        SCANNED_CREATURES = visibleCreatureList.map(creature => Number(creature.scannedBy.me ? 1 : 0))
+            .reduce((prev, next) => prev + next);
 
         // * Actions foreach of my drones
         Drone.getPlayerDrones(droneList, Player.me).forEach(drone => {
