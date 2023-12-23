@@ -85,6 +85,10 @@ namespace TS {
                 PHAZES[phazeIndex].done = true;
                 return;
             }
+
+            // * Increment Y to go up / down
+            target.y = target.y + Math.floor(Math.cos(TURNS) * 270);
+
             if (GameMap.isAtCoord(drone, target)) {
                 doAction(Action.WAIT);
                 return;
