@@ -95,7 +95,7 @@ namespace TS {
                 doAction(Action.WAIT);
                 return;
             }
-            doAction(Action.MOVE, target, TURNS % lIGHT_TOGGLE === 0 ? Light.ON : Light.OFF);
+            doAction(Action.MOVE, target, TURNS % (lIGHT_TOGGLE - 4 + phazeIndex) === 0 ? Light.ON : Light.OFF);
         }
     };
 
