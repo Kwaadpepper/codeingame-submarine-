@@ -11,6 +11,11 @@ namespace TS {
             x: 0,
             y: 0
         };
+        /** The creature actual speed */
+        speed: Speed = {
+            vX: 0,
+            vY: 0
+        }
 
         /** The creature scan status foreach players */
         scannedBy: {
@@ -39,6 +44,20 @@ namespace TS {
         /** Set creature scan status */
         setCoord(coord: Coord): void {
             this.coord = coord;
+        }
+        /** Set creature scan status */
+        setSpeed(speed: Speed): void {
+            this.speed = speed;
+        }
+
+        // * METHODS
+
+        /** Get next coordinates */
+        getNextCoordinates(): Coord {
+            return {
+                x: this.coord.x + this.speed.vX,
+                y: this.coord.y + this.speed.vY
+            };
         }
     }
 }

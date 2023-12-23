@@ -3,10 +3,22 @@ namespace TS {
     /** A unique ID */
     export type Id = number;
 
+    export type PHAZE = {
+        done: boolean,
+        action: (drone: Drone) => void
+    }
+
     /** Coordinates */
     export type Coord = {
         x: number;
         y: number;
+    }
+
+    /** Speed, this actually
+    represents a direction */
+    export type Speed = {
+        vX: number;
+        vY: number;
     }
 
     /** A player */
@@ -40,5 +52,17 @@ namespace TS {
         BottomLeft = "BL",
         /** Bottom right */
         BottomRight = "BR",
+    }
+
+    /** An action to do with the submarine */
+    export enum Action {
+        WAIT = "WAIT",
+        MOVE = "MOVE",
+    }
+
+    /** The submarine light power */
+    export enum Light {
+        OFF = 0,
+        ON = 1,
     }
 }

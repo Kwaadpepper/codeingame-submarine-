@@ -3,7 +3,36 @@ namespace TS {
     /** The game frame width and height */
     const Frame = {
         width: 9999,
-        height: 9999
+        height: 9999,
+
+        /** The start point for first Arena */
+        topStartPoint: {
+            x: Math.floor(9999 / 2),
+            y: 500
+        },
+
+        /** The map center line */
+        center: Math.floor(9999 / 2),
+
+        // * Levels deeps, each creature will stay on its level
+        levels: [
+            {
+                top: 0,
+                bottom: 2499,
+            },
+            {
+                top: 2500,
+                bottom: 4999,
+            },
+            {
+                top: 5000,
+                bottom: 7499,
+            },
+            {
+                top: 7500,
+                bottom:  9999,
+            },
+        ]
     };
 
     /** The game actual state */
@@ -33,6 +62,29 @@ namespace TS {
      * Score points by scanning valuable fish faster than your opponent.
      */
 
+    let TURNS: number = 0;
+
+    /*
+        Strategy, go middle then go down slowly,
+        Scanning all creatures on each step,
+        put on light each 5 turns then off
+    */
+    const PHAZES: Array<PHAZE> = [
+        // * --- PHASE 1 - Go MIDDLE ---
+        {
+            done: false,
+            action: (drone) => {
+                const target = Frame.topStartPoint;
+                if (GameMap.isAtCoord(drone, target)) {
+                    PHAZES[0].done = true;
+                    doAction(Action.WAIT);
+                    return;
+                }
+                doAction(Action.MOVE, target, TURNS % 5 === 0 ? Light.ON : Light.OFF);
+            }
+        }
+    ];
+
     // ----- GAME LOOP -----
     while (true) {
 
@@ -58,12 +110,27 @@ namespace TS {
         Drone.getPlayerDrones(droneList, Player.me).forEach(drone => {
             // Write an action using console.log()
             // To debug: console.error('Debug messages...');
-
-            console.log('WAIT 1');
+            const phazeToDo = PHAZES.find(phaze => !phaze.done);
+            if (phazeToDo === undefined) {
+                console.error(`Nothing left to do for drone ${drone.id}`);
+                doAction(Action.WAIT);
+            } else {
+                console.error('Do action');
+                phazeToDo.action(drone);
+            }
         });
+        TURNS++;
     }
 
     // ----- END GAME LOOP -----
+
+    /** Do an action for a Drone */
+    function doAction(action: Action, coord: Coord | null = null, light: Light = Light.OFF): void {
+        if (action === Action.MOVE && coord === null) {
+            throw Error(`Action ${action} requires some coordinates, given null`);
+        }
+        console.log(`${action}${coord ? ` ${coord.x} ${coord.y}` : ''} ${light}`);
+    }
 
     /** Get all creature that are visible right now */
     function getVisibleCreatures(): Array<Creature> {
@@ -83,6 +150,7 @@ namespace TS {
                 throw Error(`Creature ${creatureId} not found in list`);
             }
             creature.setCoord({ x: creatureX, y: creatureY });
+            creature.setSpeed({ vX: creatureVx, vY: creatureVy });
             visibleCreatureList.push(creature);
         }
         return visibleCreatureList;
