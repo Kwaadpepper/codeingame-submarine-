@@ -148,8 +148,9 @@ namespace TS {
             const radar: Radar = inputs[2] as Radar;
         }
 
-        SCANNED_CREATURES = visibleCreatureList.map(creature => Number(creature.scannedBy.me ? 1 : 0))
-            .reduce((prev, next) => prev + next);
+        SCANNED_CREATURES = visibleCreatureList.length ?
+            visibleCreatureList.map(creature => Number(creature.scannedBy.me ? 1 : 0))
+            .reduce((prev, next) => prev + next) : 0;
 
         // * Actions foreach of my drones
         Drone.getPlayerDrones(droneList, Player.me).forEach(drone => {
